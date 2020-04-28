@@ -11,7 +11,7 @@ type Queue struct {
 	queue amqp.Queue
 }
 
-func (m *Queue) Publish(msg string) {
+func (m *Queue) PublishString(msg string) {
 	err := m.ch.Publish(
 		"",
 		m.queue.Name,
@@ -32,6 +32,35 @@ func (m *Queue) Publish(msg string) {
 			UserId:          "",
 			AppId:           "",
 			Body:            []byte(msg),
+		},
+	)
+
+	if err != nil {
+		log.Fatal("큐 데이터 전송실패 ")
+	}
+}
+
+func (m *Queue) PublishByte(msg []byte) {
+	err := m.ch.Publish(
+		"",
+		m.queue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			Headers:         nil,
+			ContentType:     "text/plain",
+			ContentEncoding: "utf8",
+			DeliveryMode:    0,
+			Priority:        0,
+			CorrelationId:   "",
+			ReplyTo:         "",
+			Expiration:      "",
+			MessageId:       "",
+			Timestamp:       time.Time{},
+			Type:            "",
+			UserId:          "",
+			AppId:           "",
+			Body:            msg,
 		},
 	)
 

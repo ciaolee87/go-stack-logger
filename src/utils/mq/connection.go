@@ -19,7 +19,7 @@ func NewConnection(server string) *Connection {
 	return &Connection{conn}
 }
 
-func (c *Connection) NewQueue(queueName string) *Queue {
+func (c *Connection) NewBizQueue(queueName string) *Queue {
 	// 체널 연결
 	ch, err := c.Channel()
 	if err != nil {
