@@ -7,6 +7,8 @@ import (
 )
 
 var (
+	// 로깅 타임아웃 1분
+	EXPIRED     = time.Duration(1000 * 60)
 	STACK       = "STACK"
 	FLUSH       = "FLUSH"
 	redisClient *redis.Client
@@ -43,11 +45,11 @@ func stackLog(log *LogData) {
 	if val, err := redisClient.Get(log.Id).Result(); err == nil {
 		// 기존 데이터 있음
 		val += fmt.Sprintf(`, {"time" : "%s", "log" : "%s"}`, timeString, log.Log)
-		redisClient.Set(log.Id, val, 0)
+		redisClient.Set(log.Id, val, EXPIRED)
 	} else {
 		// 기존 데이터 없음
 		val = fmt.Sprintf(`{"createdAt" : "%s", "logs" : [ {"time" : "%s", "log" : "%s"} `, timeString, timeString, log.Log)
-		redisClient.Set(log.Id, val, 0)
+		redisClient.Set(log.Id, val, EXPIRED)
 	}
 }
 
