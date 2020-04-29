@@ -1,8 +1,10 @@
 package test
 
 import (
+	"fmt"
 	"github.com/ciaolee87/go-stack-logger/src/logReceiver"
 	"github.com/ciaolee87/go-stack-logger/src/logSender"
+	"github.com/hashicorp/go-uuid"
 )
 
 func ExampleSendTest() {
@@ -29,6 +31,30 @@ func ExampleSendFlush() {
 	}
 
 	logSender.SendMQ("test", &body)
+
+	// Output:
+}
+
+func ExampleSendAndFlush() {
+	id, _ := uuid.GenerateUUID()
+
+	for i := 0; i < 3; i++ {
+		body := logReceiver.LogData{
+			Queue: "test",
+			Id:    id,
+			Order: "STACK",
+			Log:   fmt.Sprintf(`{"log" : "Stack-%02d"}`, i),
+		}
+		logSender.SendMQ("test", &body)
+	}
+
+	flushBody := logReceiver.LogData{
+		Queue: "test",
+		Id:    id,
+		Order: "FLUSH",
+		Log:   "로그파일로 저장",
+	}
+	logSender.SendMQ("test", &flushBody)
 
 	// Output:
 }

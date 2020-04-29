@@ -3,12 +3,13 @@ package logReceiver
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	sysLog "log"
 	"time"
 )
 
 var (
 	// 로깅 타임아웃 1분
-	EXPIRED     = time.Duration(1000 * 60)
+	EXPIRED     = time.Duration(1000 * 1000 * 60)
 	STACK       = "STACK"
 	FLUSH       = "FLUSH"
 	redisClient *redis.Client
@@ -61,6 +62,9 @@ func flushLog(log *LogData) {
 
 		// 파일에 저장한다
 		LogWrite(log.Queue, val)
+
+		// 로그저장 로그 출력
+		sysLog.Print(fmt.Sprintf("write : %s - %s", log.Id, val))
 
 		// 레디스 데이터 삭제
 		redisClient.Del(log.Id)
