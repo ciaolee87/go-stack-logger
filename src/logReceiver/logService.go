@@ -38,18 +38,19 @@ func Log(log *LogData) {
 	}
 }
 
+// json 형태로 저장 { "log" : [ {...}, {...}, {...}]} 형태
+
 // 레디스에 추가한다
 func stackLog(log *LogData) {
 
-	timeString := getTimeString(time.Now())
 	// 기존 데이터 가저오기
 	if val, err := redisClient.Get(log.Id).Result(); err == nil {
 		// 기존 데이터 있음
-		val += fmt.Sprintf(`, {"time" : "%s", "log" : "%s"}`, timeString, log.Log)
+		val += fmt.Sprintf(",%s", log.Log)
 		redisClient.Set(log.Id, val, EXPIRED)
 	} else {
 		// 기존 데이터 없음
-		val = fmt.Sprintf(`{"createdAt" : "%s", "logs" : [ {"time" : "%s", "log" : "%s"} `, timeString, timeString, log.Log)
+		val = fmt.Sprintf(`{"log": [%s`, log.Log)
 		redisClient.Set(log.Id, val, EXPIRED)
 	}
 }

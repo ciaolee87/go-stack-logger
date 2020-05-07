@@ -1,0 +1,6 @@
+CON_MQ=amqp://root:dev1234@localhost:5500
+PUB_MQ=amqp://root:dev1234@localhost:5500
+LIST_FILENAME=dev.txt
+REDIS=localhost:6500
+REDIS_PW=
+LIST=dev.txt

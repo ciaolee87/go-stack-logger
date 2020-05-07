@@ -2,16 +2,17 @@ package logReceiver
 
 import (
 	"fmt"
-	osLog "log"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
 )
 
-func LogWrite(queueName string, log string) {
+// 날짜별로 큐 이름으로 저장한다.
+func LogWrite(queueName string, logData string) {
 	nowPath, err := os.Getwd()
 	if err != nil {
-		osLog.Fatal("로그 입력기 생성실패", queueName)
+		log.Fatal("로그 입력기 생성실패", queueName)
 	}
 
 	// 저장 폴더 확인 후 로그 입력
@@ -34,7 +35,6 @@ func LogWrite(queueName string, log string) {
 		}
 	}()
 
-	logFile.WriteString(log + "\n")
+	logFile.WriteString(logData + "\n")
 	logFile.Close()
-
 }
