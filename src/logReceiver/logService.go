@@ -3,36 +3,36 @@ package logReceiver
 import (
 	"fmt"
 	"github.com/go-redis/redis"
-	sysLog "log"
+	"log"
 	"time"
 )
 
 var (
 	// 로깅 타임아웃 1분
 	EXPIRED     = time.Duration(1000 * 1000 * 60)
-	STACK       = "STACK"
-	FLUSH       = "FLUSH"
+	STACK       = "00"
+	FLUSH       = "01"
 	redisClient *redis.Client
 )
 
 type LogData struct {
-	Queue string `json:"queue"` // 큐(로깅하는 프로세스이름)
-	Id    string `json:"id"`    // uuid 특정값
-	Order string `json:"order"` // 명령어
-	Log   string `json:"log"`   // 로그데이터 (파싱되지 않는 json 스트링값)
+	QueueName string // 큐(로깅하는 프로세스이름)
+	Id        string // uuid 특정값
+	Order     string // 명령어
+	Log       string // 로그데이터 (파싱되지 않는 json 스트링값)
 }
 
 func SetRedis(client *redis.Client) {
 	redisClient = client
 }
 
-func Log(log *LogData) {
-	switch log.Order {
+func Log(logData *LogData) {
+	switch logData.Order {
 	case STACK:
-		stackLog(log)
+		stackLog(logData)
 	case FLUSH:
-		stackLog(log)
-		flushLog(log)
+		stackLog(logData)
+		flushLog(logData)
 	default:
 
 	}
@@ -41,33 +41,33 @@ func Log(log *LogData) {
 // json 형태로 저장 { "log" : [ {...}, {...}, {...}]} 형태
 
 // 레디스에 추가한다
-func stackLog(log *LogData) {
+func stackLog(logData *LogData) {
 
 	// 기존 데이터 가저오기
-	if val, err := redisClient.Get(log.Id).Result(); err == nil {
+	if val, err := redisClient.Get(logData.Id).Result(); err == nil {
 		// 기존 데이터 있음
-		val += fmt.Sprintf(",%s", log.Log)
-		redisClient.Set(log.Id, val, EXPIRED)
+		val += fmt.Sprintf(`, %s`, logData.Log)
+		redisClient.Set(logData.Id, val, EXPIRED)
 	} else {
 		// 기존 데이터 없음
-		val = fmt.Sprintf(`{"log": [%s`, log.Log)
-		redisClient.Set(log.Id, val, EXPIRED)
+		val = fmt.Sprintf(`{"%s": [%s`, logData.Id, logData.Log)
+		redisClient.Set(logData.Id, val, EXPIRED)
 	}
 }
 
 // 파일에 입력한다
-func flushLog(log *LogData) {
-	if val, err := redisClient.Get(log.Id).Result(); err == nil {
+func flushLog(logData *LogData) {
+	if val, err := redisClient.Get(logData.Id).Result(); err == nil {
 		// 기존 데이터가 있을때만 실행한다
 		val += "]}"
 
 		// 파일에 저장한다
-		LogWrite(log.Queue, val)
+		LogWrite(logData.QueueName, val)
 
 		// 로그저장 로그 출력
-		sysLog.Print(fmt.Sprintf("write : %s - %s", log.Id, val))
+		log.Print(fmt.Sprintf("write : %s", val))
 
 		// 레디스 데이터 삭제
-		redisClient.Del(log.Id)
+		redisClient.Del(logData.Id)
 	}
 }

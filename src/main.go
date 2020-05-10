@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
+	"fmt"
 	"github.com/ciaolee87/go-stack-logger/src/logReceiver"
 	"github.com/ciaolee87/go-stack-logger/src/utils/bizRedis"
 	"github.com/ciaolee87/go-stack-logger/src/utils/env"
@@ -21,18 +21,29 @@ func main() {
 	// 메시지큐 가저오기
 	mqConn := mq.NewConnection(env.Get("PUB_MQ"))
 
-	// 큐 리트 불러와서 큐 저장하기
+	// 큐데터 불러와서 큐 저장하기
 	readQueueList(func(queueName string) {
 		q := mqConn.NewBizQueue(queueName)
-		go q.Consume(func(body []byte) {
-			// 언마샬링 하기
-			var logData logReceiver.LogData
-			if err := json.Unmarshal(body, &logData); err == nil {
-				// 로그 저장하기
-				logReceiver.Log(&logData)
-			}
 
-			log.Print("receive : ", string(body))
+		go q.Consume(func(body []byte) {
+			// 데이터 정리하기
+			// uuid 는 총 36자(- 포함)
+			// order는 2글자 숫자
+			str := string(body)
+			id := str[:36]
+			order := str[37:39]
+			data := str[40:]
+
+			log.Print(fmt.Sprintf("receive : %s - %s", queueName, body))
+
+			logData := logReceiver.LogData{
+				QueueName: queueName,
+				Id:        id,
+				Order:     order,
+				Log:       data,
+			}
+			logReceiver.Log(&logData)
+
 		})
 	})
 

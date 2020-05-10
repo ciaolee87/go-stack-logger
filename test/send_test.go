@@ -10,10 +10,10 @@ import (
 func ExampleSendTest() {
 
 	body := logReceiver.LogData{
-		Queue: "test",
-		Id:    "12345678–1234–1234–1234–1234567890ab",
-		Order: "STACK",
-		Log:   "스택저장3",
+		QueueName: "test",
+		Id:        "12345678–1234–1234–1234–1234567890ab",
+		Order:     "STACK",
+		Log:       "스택저장3",
 	}
 
 	logSender.SendMQ("test", &body)
@@ -24,10 +24,10 @@ func ExampleSendTest() {
 func ExampleSendFlush() {
 
 	body := logReceiver.LogData{
-		Queue: "test",
-		Id:    "12345678–1234–1234–1234–1234567890ab",
-		Order: "FLUSH",
-		Log:   "로그파일로 저장",
+		QueueName: "test",
+		Id:        "12345678–1234–1234–1234–1234567890ab",
+		Order:     "FLUSH",
+		Log:       "로그파일로 저장",
 	}
 
 	logSender.SendMQ("test", &body)
@@ -40,19 +40,19 @@ func ExampleSendAndFlush() {
 
 	for i := 0; i < 3; i++ {
 		body := logReceiver.LogData{
-			Queue: "test",
-			Id:    id,
-			Order: "STACK",
-			Log:   fmt.Sprintf(`{"log" : "Stack-%02d"}`, i),
+			QueueName: "test",
+			Id:        id,
+			Order:     "STACK",
+			Log:       fmt.Sprintf(`{"log" : "Stack-%02d"}`, i),
 		}
 		logSender.SendMQ("test", &body)
 	}
 
 	flushBody := logReceiver.LogData{
-		Queue: "test",
-		Id:    id,
-		Order: "FLUSH",
-		Log:   "로그파일로 저장",
+		QueueName: "test",
+		Id:        id,
+		Order:     "FLUSH",
+		Log:       "로그파일로 저장",
 	}
 	logSender.SendMQ("test", &flushBody)
 
